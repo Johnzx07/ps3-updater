@@ -43,6 +43,12 @@ Install them top-to-bottom by the # column for multi-update games.
 
 ## Notes
 
+- **Intended use:** this tool downloads official title updates that Sony
+  publishes for PS3 games, for use with your own legally owned game copies in
+  RPCS3. It does not access or modify any Sony account, and it does not
+  bypass any DRM — the `.pkg` files are exactly what a real console would
+  download from PSN. Use it only with games you own.
+- Licensed under MIT (see [LICENSE](LICENSE)).
 - If a download says "SHA-1 differs from Sony's listing", that's Sony's own
   metadata being stale (confirmed with real packages) — the file is fine and
   RPCS3 verifies it at install time anyway.
