@@ -5,8 +5,13 @@ straight from Sony's servers. No account needed.
 
 ## Requirements
 
-- Windows + Python 3 with `tkinter` and `requests`. The launcher finds a
-  suitable Python automatically; if none is found it tells you what to install.
+- Windows + Python 3 (any recent version, 3.9 or newer).
+- One package: `requests` — install with `python -m pip install requests`.
+- A folder with your RPCS3 `config\games.yml` file.
+
+**New here? Read [SETUP.md](SETUP.md) first** — it walks through installing
+Python (exact steps and commands), the one package needed, running the app,
+and installing the downloaded updates into RPCS3.
 
 ## How to run it
 
