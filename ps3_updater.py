@@ -114,6 +114,12 @@ def fetch_updates(title_id: str, timeout: int = 20):
         raise LookupError(f"Invalid serial format: {title_id!r} (expected 9 chars, e.g. BLUS30675)")
 
     url = UPDATE_XML_URL.format(tid=title_id)
+    # TLS note (verified against the live endpoint — see README "Security"):
+    # Sony's XML host presents a certificate chain rooted in its own private CA
+    # ("SCEI DNAS Root 05"), which is absent from every public trust store, so
+    # standard verification (verify=True) fails for EVERY client here — the same
+    # situation PySN/Rusty-PSN work around. verify=False is therefore scoped to
+    # THIS Sony request only and must never be reused for unrelated domains.
     try:
         r = requests.get(url, timeout=timeout, verify=False)
     except requests.RequestException as e:
@@ -253,6 +259,12 @@ def download_pkg(pkg: dict, dest_dir: Path, progress_cb=None, stop_event=None):
         return str(final), True, "already present"
 
     try:
+        # TLS note (verified against the live endpoint — see README "Security"):
+        # The CDN host b0.ww.np.dl.playstation.net serves a valid public
+        # Akamai/DigiCert certificate, but for its internal name (a248.e.akamai.net),
+        # not the requested hostname — so standard verification fails with a
+        # hostname mismatch for EVERY client. verify=False is scoped to THIS Sony
+        # CDN request only and must never be reused for unrelated domains.
         with requests.get(pkg["url"], stream=True, timeout=60, verify=False) as r:
             r.raise_for_status()
             total = int(r.headers.get("Content-Length") or pkg["size"] or 0)
@@ -675,7 +687,9 @@ def run_cli(serials, out_dir):
 
 
 def main():
-    requests.packages.urllib3.disable_warnings()  # Sony's CDN certs are funky (same as PySN/Rusty-PSN)
+    # Silence urllib3 InsecureRequestWarning — emitted only by the two Sony PSN
+    # requests above that use verify=False (see their TLS notes and README "Security").
+    requests.packages.urllib3.disable_warnings()
     ap = argparse.ArgumentParser(description="PS3 Updater for RPCS3")
     ap.add_argument("--cli", nargs="+", metavar="SERIAL", help="headless mode: search+download given serials")
     ap.add_argument("-o", "--out", default=str(Path.home() / "PS3Updates"), help="output folder (CLI mode)")
