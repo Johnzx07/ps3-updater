@@ -1,8 +1,8 @@
 # Setup Guide — What You Need on Your PC
 
 This app is written in **Python** and runs entirely from your own computer.
-Here's everything you need, in order. If you already have Python 3 with the two
-packages below installed (most people do), you can skip straight to step 4.
+Here's everything you need, in order. If you already have Python 3 with the
+required packages below installed (most people do), you can skip straight to step 4.
 
 ## Step 1 — Install Python (skip if you already have it)
 
@@ -33,13 +33,15 @@ updates of this project from GitHub:
 1. Go to https://git-scm.com/download/win and run the installer with default options.
 2. Verify in a new terminal: `git --version`
 
-## Step 3 — Install the two packages the app needs: `requests` + `PyYAML`
+## Step 3 — Install the packages the app needs: `requests` + `PyYAML` (+ optional `Pillow`)
 
-The app uses Python's built-in standard library (including tkinter) plus **two**
-third-party packages:
+The app uses Python's built-in standard library (including tkinter) plus **two
+required** third-party packages and one optional:
 
 - **`requests`** — makes the PSN network requests and downloads the `.pkg` files.
 - **`PyYAML`** — reads your RPCS3 `config\games.yml` so the app knows which games you own.
+- **`Pillow`** *(optional)* — renders box-art thumbnails in the results table. The
+  app works fine without it; install it only if you want artwork next to each game.
 
 If they aren't already installed, open a terminal in this folder and run:
 
@@ -53,7 +55,8 @@ python -m pip install requests PyYAML
 py -3 -m pip install requests PyYAML
 ```
 
-Or install both at once from the requirements file in this folder:
+Or install everything at once (required + optional Pillow) from the requirements
+file in this folder:
 
 ```bat
 python -m pip install -r requirements.txt

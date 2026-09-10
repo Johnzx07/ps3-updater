@@ -4,6 +4,16 @@ cd /d "%~dp0"
 title PS3 Updater
 
 rem ---------------------------------------------------------------------------
+rem Step 0: prefer the packaged EXE when it exists (built by PyInstaller).
+rem Rebuild with:  pyinstaller --onefile --windowed --name PS3Updater ps3_updater.py
+rem If dist\PS3Updater.exe is missing, fall through to running from source.
+rem ---------------------------------------------------------------------------
+if exist "%~dp0dist\PS3Updater.exe" (
+    start "" "%~dp0dist\PS3Updater.exe"
+    exit /b 0
+)
+
+rem ---------------------------------------------------------------------------
 rem Step 1: locate a working Python interpreter.
 rem We only check that the interpreter RUNS here; required modules are checked
 rem separately below so we can tell "no Python" apart from "Python but missing
