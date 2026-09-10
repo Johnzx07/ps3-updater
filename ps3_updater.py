@@ -24,6 +24,7 @@ import sys
 import threading
 import time
 import traceback
+import webbrowser
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -58,6 +59,11 @@ TMDB_HMAC_KEY = bytes.fromhex(
 DEFAULT_MAX_DOWNLOADS = 4
 # Box-art sanity cap: anything bigger is not an icon (spec: validate image size).
 MAX_ICON_BYTES = 8 * 1024 * 1024
+
+# Support links — shown in the GUI header and About dialog.
+REPO_URL = "https://github.com/Johnzx07/ps3-rpcs3-game-updater"
+YOUTUBE_URL = "https://www.youtube.com/@TheNewGamePluss"
+KOFI_URL = "https://ko-fi.com/thenewgameplus"
 
 
 def _valid_icon_bytes(data) -> bool:
@@ -528,6 +534,31 @@ def run_gui():
     ttk.Label(head, text="PS3 Updater", style="Header.TLabel").pack(side="left")
     ttk.Label(head, text="   PSN title updates for RPCS3 — no account needed",
               style="Sub.TLabel").pack(side="left", pady=(5, 0))
+
+    def open_url(url):
+        try:
+            webbrowser.open(url)
+        except Exception:
+            pass
+
+    def show_about():
+        messagebox.showinfo(
+            "About PS3 Updater",
+            "PS3 Updater for RPCS3\n"
+            "Finds and downloads official PSN title updates (.pkg)\n"
+            "for your RPCS3 games — no account needed.\n\n"
+            f"Source code:\n{REPO_URL}\n\n"
+            "Enjoying the tool?\n"
+            f"YouTube (subscribe): {YOUTUBE_URL}\n"
+            f"Ko-fi (donations): {KOFI_URL}")
+
+    # Right side of the header: About + support links. Pack order matters —
+    # each side="right" widget lands to the LEFT of the previous one, so pack
+    # right-to-left to get [About] | separator | [YouTube] [Ko-fi].
+    ttk.Button(head, text="Ko-fi — support", command=lambda: open_url(KOFI_URL)).pack(side="right")
+    ttk.Button(head, text="YouTube — subscribe", command=lambda: open_url(YOUTUBE_URL)).pack(side="right", padx=(8, 0))
+    ttk.Separator(head, orient="vertical").pack(side="right", fill="y", padx=12)
+    ttk.Button(head, text="About…", command=show_about).pack(side="right")
 
     # ---- search row -------------------------------------------------------
     top = ttk.Frame(root, padding=(12, 8, 12, 2))

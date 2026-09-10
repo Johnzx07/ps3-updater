@@ -6,7 +6,15 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
-_No unreleased changes at this time._
+### Added
+- **Support links in the GUI** — header buttons for the YouTube channel
+  ([@TheNewGamePluss](https://www.youtube.com/@TheNewGamePluss)) and Ko-fi
+  ([thenewgameplus](https://ko-fi.com/thenewgameplus)), plus an **About…** dialog
+  with both links and the repository URL.
+
+### Changed
+- README: release link now points to the renamed public repository
+  (`ps3-rpcs3-game-updater`); new "Support & Subscribe" section.
 
 ## [1.0.0] - 2026-09-10
 
@@ -63,4 +71,4 @@ no account required.
   Sony's certificate chains do not validate against standard public CAs — see
   README "Security".
 
-[1.0.0]: https://github.com/Johnzx07/ps3-updater/releases/tag/v1.0.0
+[1.0.0]: https://github.com/Johnzx07/ps3-rpcs3-game-updater/releases/tag/v1.0.0

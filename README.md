@@ -27,7 +27,7 @@ Finds and downloads official PSN title updates (`.pkg` files) for your RPCS3 gam
 
 ### Option 1: Prebuilt Windows Release (Recommended for normal users)
 
-1. Go to the [GitHub Releases](https://github.com/Johnzx07/ps3-updater/releases) page.
+1. Go to the [GitHub Releases](https://github.com/Johnzx07/ps3-rpcs3-game-updater/releases) page.
 2. Download **`PS3Updater.exe`** from the latest release (v1.0.0 and later).
 3. Put it anywhere you like and double-click to launch — no Python or other setup needed.
 4. Use the app to search for updates, download them, then install via RPCS3 (see below).
@@ -135,6 +135,13 @@ certutil -hashfile PS3Updater.exe SHA256
 
 The output should match the hash listed for `PS3Updater.exe` in `SHA256SUMS.txt`.
 If it does not, delete the file and download it again.
+
+## Support & Subscribe
+
+This tool is built and maintained by **The New Game+**. If it saves you time, the best thanks are:
+
+- **Subscribe on YouTube** — [youtube.com/@TheNewGamePluss](https://www.youtube.com/@TheNewGamePluss) (PlayStation, emulation and PC tutorials).
+- **Support with a donation** — [ko-fi.com/thenewgameplus](https://ko-fi.com/thenewgameplus) (buy me a coffee; every bit helps keep the tool maintained).
 
 ## License
 
