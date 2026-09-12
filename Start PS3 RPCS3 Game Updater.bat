@@ -1,15 +1,15 @@
 @echo off
 setlocal EnableExtensions
 cd /d "%~dp0"
-title PS3 Updater
+title PS3 RPCS3 Game Updater
 
 rem ---------------------------------------------------------------------------
 rem Step 0: prefer the packaged EXE when it exists (built by PyInstaller).
-rem Rebuild with:  pyinstaller --onefile --windowed --name PS3Updater ps3_updater.py
-rem If dist\PS3Updater.exe is missing, fall through to running from source.
+rem Rebuild with:  pyinstaller ps3-rpcs3-game-updater.spec
+rem If dist\ps3-rpcs3-game-updater.exe is missing, fall through to running from source.
 rem ---------------------------------------------------------------------------
-if exist "%~dp0dist\PS3Updater.exe" (
-    start "" "%~dp0dist\PS3Updater.exe"
+if exist "%~dp0dist\ps3-rpcs3-game-updater.exe" (
+    start "" "%~dp0dist\ps3-rpcs3-game-updater.exe"
     exit /b 0
 )
 
@@ -24,7 +24,7 @@ call :findpy "py -3.12" && goto found
 call :findpy "py -3" && goto found
 call :findpy "python" && goto found
 
-echo [PS3 Updater] No suitable Python found on this machine.
+echo [PS3 RPCS3 Game Updater] No suitable Python found on this machine.
 echo Install Python 3 from https://www.python.org/downloads/ and tick
 echo "Add python.exe to PATH" during setup, then double-click again.
 pause
@@ -45,18 +45,18 @@ call :hasmod yaml || set "MISSING=%MISSING%PyYAML "
 
 if defined MISSING goto missing
 
-echo Starting PS3 Updater with: %PYCMD%
-%PYCMD% "%~dp0ps3_updater.py"
+echo Starting PS3 RPCS3 Game Updater with: %PYCMD%
+%PYCMD% "%~dp0gui_app.py"
 if errorlevel 1 (
     echo.
-    echo [PS3 Updater] The app exited with an error, code %errorlevel%. See messages above.
+    echo [PS3 RPCS3 Game Updater] The app exited with an error, code %errorlevel%. See messages above.
     pause
 )
 exit /b 0
 
 :missing
 echo.
-echo [PS3 Updater] Python was found (%PYCMD%) but required module(s) are missing:
+echo [PS3 RPCS3 Game Updater] Python was found (%PYCMD%) but required module(s) are missing:
 echo     %MISSING%
 echo.
 echo To install the pip packages requests and/or PyYAML, run this once in a terminal:

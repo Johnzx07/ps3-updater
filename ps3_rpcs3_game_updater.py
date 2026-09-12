@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-PS3 Updater for RPCS3
-=====================
+PS3 RPCS3 Game Updater
+======================
 Scans your RPCS3 library (games.yml) or a single serial, finds available
 title updates on Sony's PSN servers, downloads the .pkg files in correct
 install order, and verifies each one with SHA-1.
 
-Usage:  python ps3_updater.py          (GUI)
-        python ps3_updater.py --cli BLUS30089   (headless test / scripting)
+Usage:  python ps3_rpcs3_game_updater.py          (GUI)
+        python ps3_rpcs3_game_updater.py --cli BLUS30089   (headless test / scripting)
 
 Only stdlib + requests + PyYAML are required.
 """
@@ -47,7 +47,8 @@ except ImportError:
     _PILImage = None
     _PILImageTk = None
 
-APP_NAME = "PS3Updater"
+APP_NAME = "ps3-rpcs3-game-updater"
+LEGACY_APP_NAME = "PS3Updater"
 UPDATE_XML_URL = "https://a0.ww.np.dl.playstation.net/tpl/np/{tid}/{tid}-ver.xml"
 # Sony's Title Metadata Database (TMDB) — same public endpoint the RPCS3 Discord
 # bot uses for game titles + box art. The path is keyed by an HMAC-SHA1 of the
@@ -96,9 +97,23 @@ def config_dir() -> Path:
     return d
 
 
+def legacy_config_file() -> Path:
+    """Return the previous config path so existing settings migrate cleanly."""
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support" / LEGACY_APP_NAME / "config.ini"
+    if sys.platform.startswith("linux"):
+        return Path.home() / ".config" / LEGACY_APP_NAME / "config.ini"
+    appdata = os.environ.get("APPDATA", str(Path.home()))
+    return Path(appdata) / LEGACY_APP_NAME / "config.ini"
+
+
 def load_config() -> dict:
     cfg = configparser.ConfigParser()
     path = config_dir() / "config.ini"
+    if not path.exists():
+        legacy = legacy_config_file()
+        if legacy.exists():
+            path = legacy
     if path.exists():
         cfg.read(path)
     downloads = cfg.get("paths", "downloads", fallback=str(Path.home() / "PS3Updates"))
@@ -509,7 +524,7 @@ def run_gui():
     # ev_q carries events FROM them to the UI. One shared queue would let an
     # idle worker steal (and silently drop) UI events — that was exactly why
     # download progress never showed up in the table.
-    # Creation order is part of the gui_selftest contract: cmd_q first, ev_q second.
+    # Keep the command and event queues separate so UI work stays responsive.
     cmd_q: "queue.Queue" = queue.Queue()
     ev_q: "queue.Queue" = queue.Queue()
     stop_event = threading.Event()
@@ -523,7 +538,7 @@ def run_gui():
     }
 
     root = tk.Tk()
-    root.title("PS3 Updater — RPCS3 game updates")
+    root.title("PS3 RPCS3 Game Updater")
     root.geometry("1040x680")
     root.minsize(920, 560)
     _apply_style(root)
@@ -531,7 +546,7 @@ def run_gui():
     # ---- header -----------------------------------------------------------
     head = ttk.Frame(root, padding=(12, 10, 12, 0))
     head.pack(fill="x")
-    ttk.Label(head, text="PS3 Updater", style="Header.TLabel").pack(side="left")
+    ttk.Label(head, text="PS3 RPCS3 Game Updater", style="Header.TLabel").pack(side="left")
     ttk.Label(head, text="   PSN title updates for RPCS3 — no account needed",
               style="Sub.TLabel").pack(side="left", pady=(5, 0))
 
@@ -543,8 +558,8 @@ def run_gui():
 
     def show_about():
         messagebox.showinfo(
-            "About PS3 Updater",
-            "PS3 Updater for RPCS3\n"
+            "About PS3 RPCS3 Game Updater",
+            "PS3 RPCS3 Game Updater\n"
             "Finds and downloads official PSN title updates (.pkg)\n"
             "for your RPCS3 games — no account needed.\n\n"
             f"Source code:\n{REPO_URL}\n\n"
@@ -598,10 +613,10 @@ def run_gui():
         try:
             games = read_games_yml(rpcs3_dir)
         except Exception as e:
-            messagebox.showerror("PS3 Updater", f"Could not read library:\n{e}")
+            messagebox.showerror("PS3 RPCS3 Game Updater", f"Could not read library:\n{e}")
             return
         if not games:
-            messagebox.showinfo("PS3 Updater", "No games found in games.yml.")
+            messagebox.showinfo("PS3 RPCS3 Game Updater", "No games found in games.yml.")
             return
         cmd_q.put(("search_many", list(games.keys()), {k: v for k, v in games.items()}, rpcs3_dir))
 
@@ -799,11 +814,11 @@ def run_gui():
     def start_downloads():
         sel = tree.selection()
         if not sel:
-            messagebox.showinfo("PS3 Updater", "Select one or more update rows first.")
+            messagebox.showinfo("PS3 RPCS3 Game Updater", "Select one or more update rows first.")
             return
         base = Path(dl_var.get().strip())
         if not base:
-            messagebox.showerror("PS3 Updater", "Choose a download folder first (top row).")
+            messagebox.showerror("PS3 RPCS3 Game Updater", "Choose a download folder first (top row).")
             return
         # group by game, keep ascending version order within each game
         per_game = {}
@@ -907,13 +922,13 @@ def run_gui():
                     n_ok = sum(1 for r in state["rows"].values() if str(r.get("status", "")).startswith("\u2713"))
                     status_lbl.configure(text=f"Done. {n_ok} update(s) ready to install \u2014 drag the .pkg files into RPCS3 or use File \u2192 Install Packages.")
                 else:
-                    print(f"[ps3_updater] unknown event: {msg!r}", file=sys.stderr, flush=True)
+                    print(f"[ps3-rpcs3-game-updater] unknown event: {msg!r}", file=sys.stderr, flush=True)
         except queue.Empty:
             pass
         except Exception:
             # A single bad event must never kill the pump — if it did, every
             # later progress/completion update would vanish silently.
-            print("[ps3_updater] poll_queue error:", file=sys.stderr, flush=True)
+            print("[ps3-rpcs3-game-updater] poll_queue error:", file=sys.stderr, flush=True)
             traceback.print_exc()
         root.after(100, poll_queue)
 
@@ -961,7 +976,7 @@ def main():
     # Silence urllib3 InsecureRequestWarning — emitted only by the two Sony PSN
     # requests above that use verify=False (see their TLS notes and README "Security").
     requests.packages.urllib3.disable_warnings()
-    ap = argparse.ArgumentParser(description="PS3 Updater for RPCS3")
+    ap = argparse.ArgumentParser(description="PS3 RPCS3 Game Updater")
     ap.add_argument("--cli", nargs="+", metavar="SERIAL", help="headless mode: search+download given serials")
     ap.add_argument("-o", "--out", default=str(Path.home() / "PS3Updates"), help="output folder (CLI mode)")
     args = ap.parse_args()

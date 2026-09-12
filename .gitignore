@@ -37,7 +37,6 @@ env/
 *.log
 _probe.txt
 baseline_gst.log
-snapshot_ps3_updater_before_ui.txt
 
 # Internal agent docs (kept local, not published)
 AGENTS.md

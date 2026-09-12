@@ -1,147 +1,99 @@
-# PS3 Updater for RPCS3
+# PS3 RPCS3 Game Updater v2
 
-Finds and downloads official PSN title updates (`.pkg` files) for your RPCS3 games — straight from Sony's servers. No account needed.
+[![Release](https://img.shields.io/github/v/release/Johnzx07/ps3-rpcs3-game-updater?display_name=tag)](https://github.com/Johnzx07/ps3-rpcs3-game-updater/releases)
 
-## Requirements
+**PS3 RPCS3 Game Updater** is a Windows app that finds, downloads, verifies, and hands off official PS3 title-update packages for games in an RPCS3 library. Version 2 replaces the original table-style app with a focused game-library interface and a safer RPCS3 install handoff.
 
-- Windows + Python 3 (any recent version, 3.9 or newer). `tkinter` ships with the standard Windows Python installer — nothing extra to install for it.
-- Two required pip packages, plus one optional:
-  - **`requests`** — used for all PSN network requests and downloads.
-  - **`PyYAML`** (imported as `yaml`) — used to read your RPCS3 `config\games.yml`.
-  - **`Pillow`** *(optional)* — renders box-art thumbnails in the results table; the app works fine without it.
+It does not need a PlayStation account, modify game content, or bypass DRM. Use it only with games you legally own.
 
-  Install with:
+## Download v2
 
-      python -m pip install requests PyYAML
+Download **`ps3-rpcs3-game-updater.exe`** from the [v2.0.0 release](https://github.com/Johnzx07/ps3-rpcs3-game-updater/releases/tag/v2.0.0), then double-click it. The build is self-contained; Windows may show a SmartScreen notice because this is an unsigned community application.
 
-  or, if you use the `py` launcher:
+The release also includes `SHA256SUMS.txt`. The v2.0.0 executable SHA-256 is `7f89b74481480c296c3eb546d77430bebebe0dfc0a7536a0534c363a65162ced`.
 
-      py -3 -m pip install requests PyYAML
+## What is new in v2
 
-  (or simply `python -m pip install -r requirements.txt`, which also installs optional Pillow)
-- A folder containing your RPCS3 `config\games.yml` file.
+- Compact cover-art game cards with clear update state and download progress.
+- Search the local library by either a game title or title ID.
+- Look up any exact nine-character title ID, including games not already in the library.
+- Click a game or **Details** to open an information sidebar with installed version, available updates, sizes, downloads, and activity.
+- Open the exact download folder for a game’s `.pkg` files.
+- Confirmed RPCS3 handoff after downloading. The app keeps the package list in order and opens RPCS3’s native installer.
+- Safe single-instance behavior: if RPCS3 is already open, the install is queued and launches automatically after it closes rather than creating a second-instance error.
+- Packaged-launch protection so RPCS3 uses its own Microsoft Visual C++ runtime instead of the updater’s temporary runtime folder.
 
-**New here? Read [SETUP.md](SETUP.md) first** — it walks through installing Python (exact steps and commands), the required packages, running the app, and installing the downloaded updates into RPCS3.
+## How it works
 
-## How to run it
+1. **Choose RPCS3.** Open **Settings** and select the folder containing `rpcs3.exe`. The app scans `config\games.yml` and `dev_hdd0\game` to build your library.
+2. **Find a game.** Use **Search library** for a local title or serial, or enter an exact serial such as `BLUS30675` under **Title ID** and choose **Check updates**.
+3. **Review the sidebar.** Click a card or **Details**. The sidebar shows the game, every available update, package sizes, and download activity.
+4. **Download in order.** Choose **Update** on a game or **Update all available**. Packages are saved in a separate game folder and verified against Sony’s listed SHA-1 values.
+5. **Open the files or install.** Use **Open download folder** to inspect the PKGs. After a successful download, choose **Yes** to send that game’s package folder to RPCS3.
+6. **Let RPCS3 finish.** If RPCS3 is already open, the updater waits for it to close and then starts one installer instance. When RPCS3 starts fresh, it may finish scanning its library before it displays its own package-review window. Review the list and choose **Install** in RPCS3.
 
-### Option 1: Prebuilt Windows Release (Recommended for normal users)
+Downloaded packages are organized like this:
 
-1. Go to the [GitHub Releases](https://github.com/Johnzx07/ps3-rpcs3-game-updater/releases) page.
-2. Download **`PS3Updater.exe`** from the latest release (v1.0.0 and later).
-3. Put it anywhere you like and double-click to launch — no Python or other setup needed.
-4. Use the app to search for updates, download them, then install via RPCS3 (see below).
+```text
+PlayStation 3/
+└── [TITLE-ID] Game Name/
+    ├── update-01.pkg
+    └── update-02.pkg
+```
 
-   Each release also ships a `SHA256SUMS.txt` so you can verify the download: on Windows run
-   `certutil -hashfile PS3Updater.exe SHA256` and compare against the listed hash.
+## v2 walkthrough
 
-### Option 2: Source / BAT Version (For developers or advanced users)
+### Browse, search, and inspect updates
 
-1. Clone or download this repository.
-2. Install dependencies (two required; `Pillow` is optional for box-art thumbnails):
+The new library view keeps games compact while the selected game’s update list and activity remain visible in the sidebar.
 
-       python -m pip install -r requirements.txt
+![V2 library with the game-details sidebar](docs/images/v2-library-sidebar.png)
 
-   Or just the required pair: `python -m pip install requests PyYAML`.
+### Inspect downloaded PKGs
 
-3. Launch using the included batch file:
+The sidebar’s **Open download folder** button opens the per-game folder, so users can see the PKGs before installation.
 
-       Start PS3 Updater.bat
+![Downloaded package folder](docs/images/v2-package-folder.png)
 
-   Or run directly:
+### Confirm the RPCS3 handoff
 
-       python ps3_updater.py
+The updater asks for confirmation after downloads complete. It never starts an install without that confirmation.
 
-## Using the app
+![Install confirmation](docs/images/v2-install-confirmation.png)
 
-1. **Scan RPCS3 library (games.yml)** — checks every game in your `games.yml` at once. On first use pick your RPCS3 install folder (it is remembered).
-2. **Search by serial/title ID** — paste a single PSN title ID into the top box and press **Search updates**.
-3. Results display with:
-   - Game icon/artwork (when available from local RPCS3 data or Sony metadata)
-   - Game title
-   - Title ID / version info
-   - Update versions, sizes, and total download size
-4. Tick the rows you want → **Download selected (in order)**.
-5. Updates are incremental: if a game needs 1.06→1.07→1.08, all three must be installed in that order — the app downloads them numbered so you can't mix them up. Use **Stop** to cancel a running download; partial files are removed.
-6. Files land in your downloads folder (default `~/PS3Updates`, changeable from the GUI) under:
+### Native RPCS3 review and install
 
-       PS3Updates/
-         PlayStation 3/
-           [SERIAL] Game Name/
+RPCS3 owns the final review and install screens. A new RPCS3 session may briefly show its library scan before the package dialog is available.
 
-## Installing into RPCS3
+![RPCS3 library scan while preparing the package flow](docs/images/v2-rpcs3-library-scan.png)
 
-Drag the `.pkg` files onto the RPCS3 window, or use **File → Install Packages**. For a game with several update packages, install all of them in ascending version order (top-to-bottom by the # column) — do not skip earlier incremental updates and jump straight to the newest.
+After confirmation in RPCS3, it reports the completed package installation.
 
-## Game metadata and artwork
+![RPCS3 package installation success](docs/images/v2-rpcs3-install-success.png)
 
-The app prioritizes artwork sources as follows:
-
-1. **Local RPCS3 data** — if you have an installed game, `ICON0.PNG` or `PIC1.png` from your RPCS3 library is used first (offline, instant).
-2. **Cached metadata/artwork** — previously downloaded images are reused.
-3. **Sony TMDB lookup** — when local art is unavailable, the app queries Sony's Title Metadata Database to fetch box art and titles.
-
-If no artwork can be found, the updater continues normally and displays a placeholder or title ID only. Artwork availability does not affect update downloads.
-
-## Security / TLS note
-
-Sony's PSN endpoints do not present standard public certificates:
-
-- The XML lookup host (`a0.ww.np.dl.playstation.net`) is signed by Sony's own private root CA ("SCEI DNAS Root 05"), which no public trust store contains, so normal verification fails for every client.
-- The CDN download host (`b0.ww.np.dl.playstation.net`) serves a valid public Akamai/DigiCert certificate, but under its internal name rather than the requested hostname, so normal verification fails with a hostname mismatch.
-
-Both facts were verified against the live endpoints (control sites such as google.com and pypi.org verify cleanly). Because of this, the app uses `verify=False` **only for those two Sony requests** — it is never applied to any other domain. The trade-off: the connection to Sony's servers is not certificate-verified. As a compensating control, every downloaded `.pkg` is checked against the SHA-1 hash in Sony's own metadata (a mismatch keeps the file but warns you), and RPCS3 verifies PKG signatures itself at install time.
-
-## Notes
-
-- **Intended use:** this tool downloads official title updates that Sony publishes for PS3 games, for use with your own legally owned game copies in RPCS3. It does not access or modify any Sony account, and it does not bypass any DRM — the `.pkg` files are exactly what a real console would download from PSN. Use it only with games you own.
-- Licensed under MIT (see [LICENSE](LICENSE)). Third-party runtime deps are all permissive: `requests` (Apache-2.0), `PyYAML` (MIT); their transitive deps — urllib3 (MIT), charset-normalizer (MIT), idna (BSD-3-Clause), certifi (MPL-2.0) — are compatible with MIT.
-- If a download says "SHA-1 differs from Sony's listing", that's Sony's own metadata being stale (confirmed with real packages) — the file is fine and RPCS3 verifies it at install time anyway.
-- CLI mode: `python ps3_updater.py --cli BLUS30675 -o PS3Updates`
-
-## Testing
-
-Two test suites, both offline/deterministic (no Sony servers required):
-
-    python gui_selftest.py     # drives the real GUI end-to-end with a faked network layer
-    python test_games_yml.py   # read_games_yml() against flat + nested games.yml formats
-
-`gui_selftest.py` covers progress, completion, error and stop branches; it runs standalone from this folder (downloads go to a temp dir, never into `PS3Updates`).
-
-## Troubleshooting
-
-- **Game not found** — verify the title ID is correct. Common prefixes: `BLUSxxxxx`, `BLESxxxxx`, `BCUSxxxxx`, `BCESxxxxx`, `NPUBxxxxx`, `NPEBxxxxx`.
-- **No updates available** — the game may already be fully updated, or Sony hasn't published an update for it.
-- **Invalid serial/title ID** — check for typos; ensure you're using a valid PSN title ID (not just a filename).
-- **RPCS3 library not detected** — confirm your RPCS3 install folder contains a `config\games.yml` file and that the app can read it.
-- **Metadata image missing** — artwork may not be available for some titles; the updater will still download updates correctly.
-- **Download failed** — check your internet connection, try again later, or verify antivirus isn't blocking the Sony domains (`a0.ww.np.dl.playstation.net`, `b0.ww.np.dl.playstation.net`).
-- **Windows SmartScreen / Antivirus warning for EXE** — this is expected for unsigned community-built executables. Download only from the official GitHub Releases page, verify the SHA256 checksum, and if you prefer, build the EXE yourself from source to confirm it matches your environment.
-
-## SHA256 Verification (Prebuilt Release)
-
-Each release publishes `SHA256SUMS.txt` alongside `PS3Updater.exe`. After downloading,
-verify the executable against it:
+## Run from source
 
 ```powershell
-Get-FileHash "PS3Updater.exe" -Algorithm SHA256
+git clone https://github.com/Johnzx07/ps3-rpcs3-game-updater.git
+cd ps3-rpcs3-game-updater
+python -m pip install -r requirements.txt
+python gui_app.py
 ```
 
-or in a regular terminal:
+`Start PS3 RPCS3 Game Updater.bat` prefers the packaged executable and falls back to the source interface.
 
-```bat
-certutil -hashfile PS3Updater.exe SHA256
+## Build v2
+
+```powershell
+python -m pip install pyinstaller
+python -m PyInstaller --noconfirm ps3-rpcs3-game-updater.spec
 ```
 
-The output should match the hash listed for `PS3Updater.exe` in `SHA256SUMS.txt`.
-If it does not, delete the file and download it again.
+The executable is written to `dist\ps3-rpcs3-game-updater.exe`. See [BUILD_EXE.md](BUILD_EXE.md) for build checks.
 
-## Support & Subscribe
+## Security and update sources
 
-This tool is built and maintained by **The New Game+**. If it saves you time, the best thanks are:
-
-- **Subscribe on YouTube** — [youtube.com/@TheNewGamePluss](https://www.youtube.com/@TheNewGamePluss) (PlayStation, emulation and PC tutorials).
-- **Support with a donation** — [ko-fi.com/thenewgameplus](https://ko-fi.com/thenewgameplus) (buy me a coffee; every bit helps keep the tool maintained).
+The app uses Sony’s public PS3 update metadata and package endpoints. It checks downloaded package SHA-1 values supplied by that metadata, and RPCS3 validates packages when installing them. Sony’s legacy endpoint certificate behavior is documented in [SECURITY.md](SECURITY.md).
 
 ## License
 

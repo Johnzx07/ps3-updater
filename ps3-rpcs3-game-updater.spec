@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['ps3_updater.py'],
+    ['gui_app.py'],
     pathex=[],
     binaries=[],
-    datas=[],
-    hiddenimports=[],
+    datas=[('assets', 'assets')],
+    hiddenimports=['PIL.Image', 'PIL.ImageTk'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -22,7 +22,8 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='PS3Updater',
+    name='ps3-rpcs3-game-updater',
+    icon='assets/app.ico',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
